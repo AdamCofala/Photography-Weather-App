@@ -1,0 +1,80 @@
+*:focus {
+    outline: none;
+}
+
+/* Ogólne tło */
+QWidget {
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #242729,
+        stop:1 #1f2123
+    );
+    color: #f0f0f0;
+    font-size: 14px;
+    font-family: Segoe UI, sans-serif;
+}
+
+/* Lista lokalizacji */
+QListWidget {
+    font-size: 16;
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #2d3033,
+        stop:1 #272a2d
+    );
+    border: 1px solid #444;
+    padding: 4px;
+}
+
+/* Element listy */
+QListWidget::item {
+    border: 2px solid #444;
+    color: white;
+    margin: 5px;
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #2f3235,
+        stop:1 #26292c
+    );
+}
+
+/* Wybrany element */
+QListWidget::item:selected {
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #4a4d50,
+        stop:1 #3b3e41
+    );
+    color: white;
+}
+
+/* Przyciski */
+QPushButton {
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #3a3d40,
+        stop:1 #2f3235
+    );
+    border: 1px solid #555;
+    padding: 6px 12px;
+    border-radius: 4px;
+}
+QPushButton:hover {
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #4d5053,
+        stop:1 #3c3f42
+    );
+}
+QPushButton:pressed {
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #2c2f32,
+        stop:1 #222527
+    );
+}
+
+/* Etykiety */
+QLabel {
+    color: #f0f0f0;
+}

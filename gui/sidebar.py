@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QListWidget, QLis
 from PyQt5.QtCore import Qt
 import random
 
+
 class Sidebar(QWidget):
     def __init__(self):
         super().__init__()
@@ -12,10 +13,10 @@ class Sidebar(QWidget):
         layout.addWidget(self.location_list)
 
         self.add_btn = QPushButton("Dodaj lokalizację")
-        self.add_btn.clicked.connect(self.addLoc)
+        self.add_btn.clicked.connect(self.add_loc)
 
         self.remove_btn = QPushButton("Usuń lokalizację")
-        self.remove_btn.clicked.connect(self.delLoc)
+        self.remove_btn.clicked.connect(self.remove_loc)
         self.remove_btn.setFocusPolicy(Qt.NoFocus)
 
         layout.addWidget(self.add_btn)
@@ -23,8 +24,8 @@ class Sidebar(QWidget):
 
         self.setLayout(layout)
 
-    def addLoc(self):
+    def add_loc(self):
         self.location_list.addItem(f"Otwock \n {random.uniform(-90, 90):.2f}, {random.uniform(-90, 90):.2f}")
 
-    def delLoc(self):
+    def remove_loc(self):
         self.location_list.takeItem(self.location_list.currentRow())

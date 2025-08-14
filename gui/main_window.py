@@ -19,4 +19,4 @@ class MainWindow(QMainWindow):
         self.main_view = MainView()
 
         layout.addWidget(self.sidebar, 1)
-        layout.addWidget(self.main_view, 3)
+        layout.addWidget(self.main_view, 4)
