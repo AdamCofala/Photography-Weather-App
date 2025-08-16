@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QListWidget, QListWidgetItem
 from PyQt5.QtCore import Qt
 import random
-
+import logic.location_base as loc
 
 class Sidebar(QWidget):
     def __init__(self):
@@ -11,6 +11,7 @@ class Sidebar(QWidget):
 
         self.location_list = QListWidget()
         layout.addWidget(self.location_list)
+        self.update_list()
 
         self.add_btn = QPushButton("Dodaj lokalizację")
         self.add_btn.clicked.connect(self.add_loc)
@@ -24,8 +25,19 @@ class Sidebar(QWidget):
 
         self.setLayout(layout)
 
+    def update_list(self):
+        self.location_list.clear()
+        locations = loc.get_locations("assets/config.json")
+        if locations:
+            for location in locations:
+                self.location_list.addItem(f"{location["Name"]}\n {location["Lat"]:.2f}, {location["Lon"]:.2f} ")
+
     def add_loc(self):
-        self.location_list.addItem(f"Otwock \n {random.uniform(-90, 90):.2f}, {random.uniform(-90, 90):.2f}")
+        # SIGNAL to main window to execute main_view.show_map()
+        pass
 
     def remove_loc(self):
-        self.location_list.takeItem(self.location_list.currentRow())
+        current = self.location_list.currentRow()
+        self.location_list.takeItem(current)
+        loc.remove_loc("assets/config.json", current)
+        self.update_list()

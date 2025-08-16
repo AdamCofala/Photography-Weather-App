@@ -1,17 +1,12 @@
-import folium
-from folium import Element
-import io
-import tempfile
-import os
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QApplication
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtCore import QTimer, QUrl,  QObject, pyqtSlot
-import sys
-import json
-import re
+import folium
+from folium import Element
+import io, tempfile, os, sys, json, re
+import logic.location_base as loc
 
 class MainView(QWidget):
-
 
     def __init__(self):
         super().__init__()
@@ -23,6 +18,7 @@ class MainView(QWidget):
         self.show_map()
 
     def show_map(self, lat=52.2297, lon=21.0122, zoom=6):
+
         self.map_active = True
 
         # Widok przeglądarki
@@ -97,7 +93,7 @@ class MainView(QWidget):
 
         /* Popupy Leaflet */
         .leaflet-popup-content-wrapper {
-            background: #222 !important;
+            background: #242729 !important;
             color: white !important;
         }
         .leaflet-popup-tip {
@@ -107,48 +103,12 @@ class MainView(QWidget):
         </style>
 
         """
-
-        # Nowa funkcja
-        new_function = '''function latLngPop(e) {
-            // Zapisz współrzędne do localStorage
-            var coords = {
-                lat: e.latlng.lat,
-                lng: e.latlng.lng,
-                timestamp: Date.now()
-            };
-
-            var popupName = Object.keys(window).find(key => key.includes('lat_lng_popup_'));
-            var mapName = Object.keys(window).find(key => key.includes('map_'));
-
-            if (popupName && mapName) {
-                window[popupName]
-                    .setLatLng(e.latlng)
-                    .setContent(
-                        "<div style='font-family: Segoe UI; color: white; font-size: 12px;'>" +
-                        "<button id='addLocationBtn' class='custom-popup-btn'>➕ Dodaj lokalizację</button>" +
-                        "<br><br>Lat: " + e.latlng.lat.toFixed(6) +
-                        "<br>Lng: " + e.latlng.lng.toFixed(6) +
-                        "<br>Czas: " + new Date().toLocaleString() +
-                        "</div>"
-                    )
-
-                    .openOn(window[mapName]);
-
-                // Podłączamy event do przycisku po otwarciu popupu
-                setTimeout(function() {
-                    var btn = document.getElementById('addLocationBtn');
-                    if (btn) {
-                        btn.addEventListener('click', function() {
-                            alert('Dodano lokalizację: ' + e.latlng.lat.toFixed(6) + ', ' + e.latlng.lng.toFixed(6));
-                            localStorage.setItem('lastCoordinates', JSON.stringify(coords));
-                        });
-                    }
-                }, 0);
-            }
-        }'''
         html_content = html_content.replace("</head>", style + "</head>")
 
-        # Zamień funkcję
+        # Nowa funkcja
+        with open("logic/custom latLngPop.js", "r", encoding="utf-8") as f:
+            new_function = f.read()
+
         modified_html = re.sub(pattern, new_function, html_content)
         return modified_html
 
@@ -175,9 +135,8 @@ class MainView(QWidget):
                 lat = coords['lat']
                 lng = coords['lng']
                 timestamp = coords['timestamp']
-
                 self.close_map()
-                self.process_coordinates(lat, lng)
+                self.process_coordinates(lat, lng, timestamp)
             except json.JSONDecodeError:
                 pass
 
@@ -187,10 +146,11 @@ class MainView(QWidget):
         self.web_view = None
         self.map_active = False
 
-    def process_coordinates(self, lat, lng):
+    def process_coordinates(self, lat, lng, time):
         """Przetwórz współrzędne w Python"""
-        # Tutaj dodaj swoją logikę, np.:
         print(f"Przetwarzam współrzędne: {lat}, {lng}")
+
+        locaction = loc.Location("temp", lat, lng, time, "assets/config.json").to_json()
         # - zapisz do bazy danych
         # - wyślij do API
         # - zaktualizuj inne części UI
