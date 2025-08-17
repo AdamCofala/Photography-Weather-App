@@ -9,7 +9,6 @@ def get_locations(path):
         except (json.JSONDecodeError, TypeError):
             return []
 
-
 class Location:
 
     _next_id = None
