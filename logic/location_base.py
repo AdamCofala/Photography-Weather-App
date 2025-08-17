@@ -9,22 +9,6 @@ def get_locations(path):
         except (json.JSONDecodeError, TypeError):
             return []
 
-def remove_loc(path, id):
-    locations = get_locations(path)
-
-    new_loc = []
-    deleted = False
-
-    for loc in locations:
-        if loc["ID"] == id:
-            deleted = True
-            continue
-        if deleted:
-            loc["ID"] -= 1
-        new_loc.append(loc)
-
-    with open(path, "w") as config:
-        json.dump(new_loc, config, indent=4)
 
 class Location:
 
@@ -59,8 +43,22 @@ class Location:
 
         with open(self.path, "w") as config:
             json.dump(locations, config, indent=4)
+def remove_loc(path, id):
+    locations = get_locations(path)
 
+    new_loc = []
+    deleted = False
 
+    for loc in locations:
+        if loc["ID"] == id:
+            deleted = True
+            continue
+        if deleted:
+            loc["ID"] -= 1
+        new_loc.append(loc)
+
+    with open(path, "w") as config:
+        json.dump(new_loc, config, indent=4)
 
 
 if __name__ == '__main__':

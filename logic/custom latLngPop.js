@@ -26,7 +26,6 @@ function latLngPop(e) {
                     var btn = document.getElementById('addLocationBtn');
                     if (btn) {
                         btn.addEventListener('click', function() {
-                            alert('Dodano lokalizację: ' + e.latlng.lat.toFixed(6) + ', ' + e.latlng.lng.toFixed(6));
                             localStorage.setItem('lastCoordinates', JSON.stringify(coords));
                         });
                     }
