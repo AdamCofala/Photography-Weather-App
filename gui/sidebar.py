@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QListWidget, QListWidgetItem
 from PyQt5.QtCore import Qt, pyqtSignal
 import random
-import logic.location_base as loc
+import logic.utils.location_base as loc
 
 class Sidebar(QWidget):
 

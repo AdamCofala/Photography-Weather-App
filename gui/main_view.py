@@ -2,9 +2,9 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QApplication
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtCore import QTimer, QUrl, pyqtSignal
 import tempfile, os, sys, json, re
-import logic.location_base as loc
-import logic.haversine as hv
-from logic.map_handler import MapHandler
+import logic.utils.location_base as loc
+import logic.utils.haversine as hv
+from logic.map.map_handler import MapHandler
 
 
 class MainView(QWidget):

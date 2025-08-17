@@ -2,7 +2,7 @@ import folium
 import tempfile
 import os
 import re
-import logic.location_base as loc
+import logic.utils.location_base as loc
 
 class MapHandler:
     def __init__(self):
@@ -90,7 +90,7 @@ class MapHandler:
         html_content = html_content.replace("</head>", style + "</head>")
 
         # Nowa funkcja
-        with open("logic/custom latLngPop.js", "r", encoding="utf-8") as f:
+        with open("logic/map/custom latLngPop.js", "r", encoding="utf-8") as f:
             new_function = f.read()
 
         modified_html = re.sub(pattern, new_function, html_content)
