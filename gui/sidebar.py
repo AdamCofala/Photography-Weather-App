@@ -81,3 +81,5 @@ class Sidebar(QWidget):
         item = self.location_list.item(new_row)
         if item:
             item.setSelected(True)
+            self.choose_location.emit(self.location_list.currentRow())
+
