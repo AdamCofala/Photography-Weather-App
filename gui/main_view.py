@@ -42,9 +42,8 @@ class MainView(QWidget):
         self.m = self.map_handler.create_map(lat, lon, zoom)
         temp_html = self.map_handler.save_map_to_temp_file()
 
-        self.web_view.load(QUrl.fromLocalFile(temp_html))
 
-        QTimer.singleShot(2000, lambda: self.cleanup_file(temp_html))
+        self.web_view.load(QUrl.fromLocalFile(temp_html))
 
     def check_coordinates(self):
         js_code = """
