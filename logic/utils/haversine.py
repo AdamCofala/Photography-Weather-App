@@ -12,7 +12,7 @@ def calc_distance(lat_a, lon_a, lat_b, lon_b):
     return 6371 * c
 
 
-def find_closest(lat, lon, dict_of_loc):
+def find_closest_city(lat, lon, dict_of_loc):
     return min(
         dict_of_loc,
         key=lambda city: calc_distance(
@@ -20,4 +20,14 @@ def find_closest(lat, lon, dict_of_loc):
             city["Latitude"],
             city["Longitude"]
         ) if city["Type"] == "city" else float("inf")
+    )
+
+def find_closest_hydrostation(lat, lon, dict_of_loc):
+    return min(
+        dict_of_loc,
+        key=lambda station: calc_distance(
+            lat, lon,
+            station["lat"],
+            station["lon"]
+        )
     )

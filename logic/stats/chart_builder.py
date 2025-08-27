@@ -433,3 +433,20 @@ class MeteoPlot(FigureCanvas):
             top=0.82,
             bottom=0.20
         )
+
+class HydroPlot(FigureCanvas):
+
+    def __init__(self, id, parent=None):
+        super().__init__(parent)
+
+        self.MAIN_COLOR = '#ff4f64'
+        self.APPARENT_COLOR = '#5bc0ff'
+        self.RAIN_COLOR = '#4da6ff'
+        self.CLOUD_COLOR = '#888888'
+        self.SUNSET_COLOR = '#ff6b35'
+        self.SUNRISE_COLOR = '#ffb347'
+
+        self.id = id
+        self._setup_matplotlib_style()
+        if self._load_data():
+            self._create_plot()

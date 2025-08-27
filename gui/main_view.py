@@ -129,12 +129,12 @@ class MainView(QWidget):
             with open("assets/polish_cities.json", "r", encoding="utf-8") as f:
                 cities = json.load(f)
 
-            closest_city = hv.find_closest(lat, lng, cities)
+            closest_city = hv.find_closest_city(lat, lng, cities)
             name = closest_city.get("Name", "Unknown")
 
             # Create location and save to config
             location = loc.Location(str(name), lat, lng, time, "assets/config.json")
-            location_json = location.to_json()
+            location.to_json()
 
             # Emit signal that config was updated
             self.config_was_updated.emit()
