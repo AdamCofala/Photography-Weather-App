@@ -3,10 +3,11 @@ from PyQt5.QtCore import Qt, pyqtSignal
 import random
 import logic.utils.location_base as loc
 
-class Sidebar(QWidget):
 
+class Sidebar(QWidget):
     add_location = pyqtSignal()
     choose_location = pyqtSignal(int)
+    list_empty = pyqtSignal()
 
     def __init__(self):
         super().__init__()
@@ -17,7 +18,7 @@ class Sidebar(QWidget):
         layout.addWidget(self.location_list)
         self.update_list()
 
-       # If item was clicked send info to main and then show the stats!
+        # If item was clicked send info to main and then show the stats!
         self.location_list.itemClicked.connect(self.choose_loc)
 
         self.add_btn = QPushButton("Dodaj lokalizację")
@@ -32,13 +33,33 @@ class Sidebar(QWidget):
 
         self.setLayout(layout)
 
-    def update_list(self):
+        self.last_selection(False)
 
+    def last_selection(self, var):
+        item = self.location_list.item(self.location_list.count() - 1)
+        if item:
+            item.setSelected(var)
+
+    def update_list(self):
         self.location_list.clear()
         locations = loc.get_locations("assets/config.json")
-        if locations:
-            for location in locations:
-                self.location_list.addItem(f"{location["Name"]}\n {location["Lat"]:.2f}, {location["Lon"]:.2f} ")
+
+        if not locations:  # Lista jest pusta
+            self.list_empty.emit()  # Emituj sygnał pustej listy
+            return
+
+        # Lista nie jest pusta - dodaj elementy
+        for location in locations:
+            self.location_list.addItem(f"{location['Name']}\n {location['Lat']:.2f}, {location['Lon']:.2f} ")
+
+        # Automatycznie wybierz ostatni element tylko jeśli lista nie jest pusta
+        count = self.location_list.count()
+        if count > 0:
+            item = self.location_list.item(count - 1)
+            if item:
+                item.setSelected(True)
+                self.location_list.setCurrentRow(count - 1)
+                self.choose_location.emit(self.location_list.currentRow())
 
     def add_loc(self):
         self.location_list.setCurrentRow(-1)  # no current row
@@ -46,8 +67,9 @@ class Sidebar(QWidget):
         self.add_location.emit()
 
     def choose_loc(self):
-        self.choose_location.emit(self.location_list.currentRow())
-
+        current_row = self.location_list.currentRow()
+        if current_row >= 0:  # Sprawdź czy wybór jest poprawny
+            self.choose_location.emit(current_row)
 
     def remove_loc(self):
         current = self.location_list.currentRow()
@@ -67,8 +89,10 @@ class Sidebar(QWidget):
 
         # Handle selection after removal
         new_count = self.location_list.count()
+
+        # KLUCZOWA ZMIANA: Jeśli lista jest pusta, nie rób nic więcej
         if new_count == 0:
-            return
+            return  # Lista pusta - update_list() już wyemitowało list_empty
 
         # Determine which row to select
         if current >= new_count:
@@ -81,5 +105,4 @@ class Sidebar(QWidget):
         item = self.location_list.item(new_row)
         if item:
             item.setSelected(True)
-            self.choose_location.emit(self.location_list.currentRow())
-
+            self.choose_location.emit(new_row)

@@ -102,4 +102,4 @@ class MapHandler:
         try:
             os.unlink(filepath)
         except:
-            print("unlink didnt work")
+            return 0

@@ -26,5 +26,5 @@ class MainWindow(QMainWindow):
 
         # After clicking add loc in side bar -> show map:
         self.sidebar.add_location.connect(self.main_view.show_map)
-
         self.sidebar.choose_location.connect(self.main_view.show_stats)
+        self.sidebar.list_empty.connect(self.main_view.show_map)
