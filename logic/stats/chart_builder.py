@@ -418,7 +418,7 @@ class MeteoPlot(FigureCanvas):
             f"Temperature Forecast - {self.location['Name']}",
             fontsize=12,
             pad=35,
-            color='#f0f0f0',
+            color='white',
             fontweight='bold'
         )
 
@@ -437,16 +437,119 @@ class MeteoPlot(FigureCanvas):
 class HydroPlot(FigureCanvas):
 
     def __init__(self, id, parent=None):
-        super().__init__(parent)
+        self.fig = Figure(figsize=(5, 3))
+        super().__init__(self.fig)
 
-        self.MAIN_COLOR = '#ff4f64'
-        self.APPARENT_COLOR = '#5bc0ff'
-        self.RAIN_COLOR = '#4da6ff'
-        self.CLOUD_COLOR = '#888888'
-        self.SUNSET_COLOR = '#ff6b35'
-        self.SUNRISE_COLOR = '#ffb347'
+        self.MAIN_COLOR = '#03d7fc'
 
         self.id = id
+        self.ax = self.fig.add_subplot(111)
+
         self._setup_matplotlib_style()
         if self._load_data():
             self._create_plot()
+        self._adjust_layout()
+
+    def _setup_matplotlib_style(self):
+        """Configure matplotlib style for dark theme."""
+        mpl.rcParams.update({
+            'figure.facecolor': '#1a1c1e',
+            'axes.facecolor': '#1a1c1e',
+            'axes.edgecolor': '#4a4f55',
+            'axes.labelcolor': '#e0e0e0',
+            'xtick.color': '#b0b0b0',
+            'ytick.color': '#b0b0b0',
+            'grid.color': '#3a3f45',
+            'grid.linestyle': '--',
+            'grid.alpha': 0.7,
+            'lines.linewidth': 2.5,
+            'font.size': 9,
+            'font.family': 'Segoe UI',
+            'legend.facecolor': '#2a2e32',
+            'legend.edgecolor': '#3a3f45',
+            'legend.fontsize': 10,
+            'legend.labelcolor': 'white',
+            'legend.framealpha': 0.9,
+            'xtick.direction': 'out',
+            'ytick.direction': 'out',
+        })
+
+    def _load_data(self):
+        try:
+            fetcher = data_fetcher.DataFetcher(self.id)
+            self.hydro_data = fetcher.get_hydro_data()
+            self.location = data_fetcher.get_current(self.id)
+            if not self.hydro_data:
+                print("No hydro data available for display")
+                return False
+            return True
+        except Exception as e:
+            print(f"Error loading data: {e}")
+            return False
+
+    def _create_plot(self):
+        # extract times and water levels
+        times = []
+        levels = []
+        for entry in self.hydro_data:
+            ts = entry["data"]["stan_wody_data_pomiaru"]
+            value = entry["data"]["stan_wody"]
+            try:
+                dt = datetime.strptime(ts, "%Y-%m-%d %H:%M:%S")
+                times.append(dt)
+                levels.append(int(value))
+            except Exception as e:
+                print(f"Skipping entry {entry}: {e}")
+
+        # clear previous plot
+        self.ax.clear()
+
+        time_nums = mdates.date2num(times)
+        self.time_nums_smooth = np.linspace(time_nums[0], time_nums[-1], len(time_nums) * 6)
+        self.times_smooth = mdates.num2date(self.time_nums_smooth)
+
+        if len(time_nums) >= 4:
+            kind = "cubic"
+        elif len(time_nums) == 3:
+            kind = "quadratic"
+        else:
+            kind = "linear"
+
+        l_temp = interp1d(time_nums, levels, kind=kind, fill_value="extrapolate")
+        self.levels_smooth = l_temp(self.time_nums_smooth)
+
+        # plot water levels
+        self.ax.plot(self.times_smooth, self.levels_smooth, color=self.MAIN_COLOR, linestyle="-", label="Water level")
+        self.ax.fill_between(
+            self.times_smooth,
+            0,
+            self.levels_smooth,
+            color=self.MAIN_COLOR,
+            alpha=0.08,
+            zorder=1
+        )
+
+        self.ax.set_ylim(min(levels)-5, max(levels) + 5)
+
+        # format x axis for time
+        self.ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+        self.ax.set_xlim(left=times[0], right=times[len(times)-1])
+        self.fig.autofmt_xdate()
+
+        # labels and title
+        self.ax.set_title(f"Water level – {self.hydro_data[0]['data']['stacja']}", fontsize=12, color="white", fontweight="bold")
+        self.ax.set_xlabel("Czas pomiaru")
+        self.ax.set_ylabel("Stan wody [cm]")
+        self.ax.grid(True, linestyle="--", alpha=0.6)
+        self.ax.legend()
+        self.fig.set_facecolor("none")
+        self.draw()
+
+    def _adjust_layout(self):
+        """Adjust plot layout and margins."""
+        self.figure.subplots_adjust(
+            left=0.08,
+            right=0.92,
+            top=0.82,
+            bottom=0.20
+        )

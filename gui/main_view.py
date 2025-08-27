@@ -23,7 +23,7 @@ class MainView(QWidget):
 
         # Initialize all widgets as None
         self.meteo_view = None
-        self.desc = None
+        self.hydro_view = None
         self.web_view = None
         self.timer = None
         self.coords_file = None
@@ -46,6 +46,10 @@ class MainView(QWidget):
             meteo_plot = cb.MeteoPlot(id)
             self.meteo_view = meteo_plot.canvas if hasattr(meteo_plot, 'canvas') else meteo_plot
             self.layout().addWidget(self.meteo_view)
+
+            hydro_plot = cb.HydroPlot(id)
+            self.hydro_view = hydro_plot.canvas if hasattr(hydro_plot, 'canvas') else hydro_plot
+            self.layout().addWidget(self.hydro_view)
 
         except Exception as e:
             print(f"Error creating stats view: {e}")
@@ -187,11 +191,10 @@ class MainView(QWidget):
             self.meteo_view.deleteLater()
             self.meteo_view = None
 
-        # Clean up description label
-        if self.desc:
-            self.layout().removeWidget(self.desc)
-            self.desc.deleteLater()
-            self.desc = None
+        if self.hydro_view:
+            self.layout().removeWidget(self.hydro_view)
+            self.hydro_view.deleteLater()
+            self.hydro_view = None
 
         self.stats_active = False
 

@@ -22,12 +22,13 @@ def find_closest_city(lat, lon, dict_of_loc):
         ) if city["Type"] == "city" else float("inf")
     )
 
+
 def find_closest_hydrostation(lat, lon, dict_of_loc):
     return min(
         dict_of_loc,
         key=lambda station: calc_distance(
             lat, lon,
-            station["lat"],
-            station["lon"]
+            float(station["lat"]),
+            float(station["lon"])
         )
     )
