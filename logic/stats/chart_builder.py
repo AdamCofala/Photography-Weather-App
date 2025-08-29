@@ -4,7 +4,7 @@ from matplotlib.figure import Figure
 import matplotlib.dates as mdates
 import matplotlib.ticker as ticker
 import logic.stats.data_fetcher as data_fetcher
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 import matplotlib as mpl
 import numpy as np
 from scipy.interpolate import interp1d
@@ -17,7 +17,7 @@ class MeteoPlot(FigureCanvas):
         super().__init__(parent)
 
         # Constants
-        self.CHART_HOURS = 48
+        self.CHART_HOURS = 36
         self.MAIN_COLOR = '#ff4f64'
         self.APPARENT_COLOR = '#5bc0ff'
         self.RAIN_COLOR = '#4da6ff'
@@ -108,7 +108,6 @@ class MeteoPlot(FigureCanvas):
             except Exception as e:
                 print(f"Error fetching sun data for {date}: {e}")
 
-        print(f"Debug - Found {len(self.sun_markers)} sun markers")
 
     def _get_chart_dates(self):
         """Get list of dates covered by the chart."""
@@ -441,7 +440,6 @@ class HydroPlot(FigureCanvas):
         super().__init__(self.fig)
 
         self.MAIN_COLOR = '#03d7fc'
-
         self.id = id
         self.ax = self.fig.add_subplot(111)
 
@@ -449,6 +447,7 @@ class HydroPlot(FigureCanvas):
         if self._load_data():
             self._create_plot()
         self._adjust_layout()
+
 
     def _setup_matplotlib_style(self):
         """Configure matplotlib style for dark theme."""
@@ -474,6 +473,7 @@ class HydroPlot(FigureCanvas):
             'ytick.direction': 'out',
         })
 
+
     def _load_data(self):
         try:
             fetcher = data_fetcher.DataFetcher(self.id)
@@ -487,10 +487,9 @@ class HydroPlot(FigureCanvas):
             print(f"Error loading data: {e}")
             return False
 
-    def _create_plot(self):
-        # extract times and water levels
-        times = []
-        levels = []
+    def _parse_data(self):
+        """Extract times and levels from raw hydro data."""
+        times, levels = [], []
         for entry in self.hydro_data:
             ts = entry["data"]["stan_wody_data_pomiaru"]
             value = entry["data"]["stan_wody"]
@@ -500,13 +499,14 @@ class HydroPlot(FigureCanvas):
                 levels.append(int(value))
             except Exception as e:
                 print(f"Skipping entry {entry}: {e}")
+        return times, levels
 
-        # clear previous plot
-        self.ax.clear()
 
+    def _smooth_data(self, times, levels):
+        """Interpolate levels for smoother plot."""
         time_nums = mdates.date2num(times)
-        self.time_nums_smooth = np.linspace(time_nums[0], time_nums[-1], len(time_nums) * 6)
-        self.times_smooth = mdates.num2date(self.time_nums_smooth)
+        dense_time_nums = np.linspace(time_nums[0], time_nums[-1], len(time_nums) * 6)
+        dense_times = mdates.num2date(dense_time_nums)
 
         if len(time_nums) >= 4:
             kind = "cubic"
@@ -515,35 +515,71 @@ class HydroPlot(FigureCanvas):
         else:
             kind = "linear"
 
-        l_temp = interp1d(time_nums, levels, kind=kind, fill_value="extrapolate")
-        self.levels_smooth = l_temp(self.time_nums_smooth)
+        interpolator = interp1d(time_nums, levels, kind=kind, fill_value="extrapolate")
+        smooth_levels = interpolator(dense_time_nums)
 
-        # plot water levels
-        self.ax.plot(self.times_smooth, self.levels_smooth, color=self.MAIN_COLOR, linestyle="-", label="Water level")
+        return dense_times, smooth_levels
+
+    def _plot_levels(self, times_smooth, levels_smooth):
+        """Plot water levels and shaded area."""
+        self.ax.plot(times_smooth, levels_smooth, color=self.MAIN_COLOR, linestyle="-", label="Water level")
         self.ax.fill_between(
-            self.times_smooth,
-            0,
-            self.levels_smooth,
-            color=self.MAIN_COLOR,
-            alpha=0.08,
-            zorder=1
+            times_smooth, 0, levels_smooth,
+            color=self.MAIN_COLOR, alpha=0.08, zorder=1
         )
 
-        self.ax.set_ylim(min(levels)-5, max(levels) + 5)
+    def _set_y_limits(self, levels_smooth):
+        """Add padding to Y-axis limits."""
+        y_min, y_max = min(levels_smooth), max(levels_smooth)
+        y_range = y_max - y_min
+        padding = max(5, y_range * 0.1)
+        self.ax.set_ylim(y_min - padding, y_max + padding)
 
-        # format x axis for time
-        self.ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-        self.ax.set_xlim(left=times[0], right=times[len(times)-1])
-        self.fig.autofmt_xdate()
+    def _configure_x_axis(self, times):
+        """Set up X-axis gridlines at midnight, labels at midday."""
+        # midnight ticks for grid
+        self.ax.xaxis.set_major_locator(mdates.DayLocator())
+        self.ax.xaxis.set_major_formatter(ticker.NullFormatter())
 
-        # labels and title
-        self.ax.set_title(f"Water level – {self.hydro_data[0]['data']['stacja']}", fontsize=12, color="white", fontweight="bold")
+        # midday labels
+        midday_ticks, day_labels = [], []
+        unique_days = sorted(set([t.date() for t in times]))
+        for day in unique_days:
+            target = datetime.combine(day, time(12, 0))
+            day_times = [t for t in times if t.date() == day]
+            if not day_times:
+                continue
+            nearest = min(day_times, key=lambda x: abs(x - target))
+            midday_ticks.append(nearest)
+            day_labels.append(nearest.strftime("%d %b"))
+
+        self.ax.xaxis.set_minor_locator(ticker.FixedLocator(mdates.date2num(midday_ticks)))
+        self.ax.xaxis.set_minor_formatter(ticker.FixedFormatter(day_labels))
+        self.ax.set_xlim(times[0], times[-1])
+
+    def _add_labels_and_grid(self):
+        """Set titles, labels, legend, grid."""
+        self.ax.set_title(
+            f"Water level – {self.hydro_data[0]['data']['stacja']}",
+            fontsize=12, color="white", fontweight="bold"
+        )
         self.ax.set_xlabel("Czas pomiaru")
         self.ax.set_ylabel("Stan wody [cm]")
         self.ax.grid(True, linestyle="--", alpha=0.6)
         self.ax.legend()
         self.fig.set_facecolor("none")
+
+    def _create_plot(self):
+        """High-level orchestrator for building the plot."""
+        times, levels = self._parse_data()
+        self.ax.clear()
+        times_smooth, levels_smooth = self._smooth_data(times, levels)
+        self._plot_levels(times_smooth, levels_smooth)
+        self._set_y_limits(levels_smooth)
+        self._configure_x_axis(times)
+        self._add_labels_and_grid()
         self.draw()
+
 
     def _adjust_layout(self):
         """Adjust plot layout and margins."""
