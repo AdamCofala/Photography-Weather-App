@@ -6,7 +6,7 @@ import logic.utils.location_base as loc
 import logic.utils.haversine as hv
 from logic.map.map_handler import MapHandler
 import logic.stats.chart_builder as cb
-import  logic.stats.data_fetcher as df
+
 
 
 
@@ -39,16 +39,18 @@ class MainView(QWidget):
         self.stats_active = True
         self.map_active = False
 
-        print(f"Showing stats for ID: {id}")
-
         try:
             # Create meteo plot
             meteo_plot = cb.MeteoPlot(id)
             self.meteo_view = meteo_plot.canvas if hasattr(meteo_plot, 'canvas') else meteo_plot
+            self.meteo_view.setObjectName("meteo_chart")
+
             self.layout().addWidget(self.meteo_view)
 
             hydro_plot = cb.HydroPlot(id)
             self.hydro_view = hydro_plot.canvas if hasattr(hydro_plot, 'canvas') else hydro_plot
+            self.hydro_view.setObjectName("hydro_chart")
+
             self.layout().addWidget(self.hydro_view)
 
         except Exception as e:

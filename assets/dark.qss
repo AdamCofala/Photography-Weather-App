@@ -14,6 +14,11 @@ QWidget {
     font-family: Segoe UI, sans-serif;
 }
 
+QWidget#meteo_chart,
+QWidget#hydro_chart {
+    background-color: rgba(0, 0, 0, 0.06);
+}
+
 /* Lista lokalizacji */
 QListWidget {
     font-size: 16;

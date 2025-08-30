@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas, \
+    NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 import matplotlib.dates as mdates
 import matplotlib.ticker as ticker
@@ -8,33 +9,20 @@ from datetime import datetime, timedelta, time
 import matplotlib as mpl
 import numpy as np
 from scipy.interpolate import interp1d
+import mplcursors
 
 
-class MeteoPlot(FigureCanvas):
-    """Weather forecast plot with temperature, precipitation, cloud cover, and sun markers."""
+class BasePlot(FigureCanvas):
+    """Base class for all plots with common functionality."""
 
-    def __init__(self, id, parent=None):
+    def __init__(self, parent=None):
         super().__init__(parent)
-
-        # Constants
-        self.CHART_HOURS = 36
-        self.MAIN_COLOR = '#ff4f64'
-        self.APPARENT_COLOR = '#5bc0ff'
-        self.RAIN_COLOR = '#4da6ff'
-        self.CLOUD_COLOR = '#888888'
-        self.SUNSET_COLOR = '#ff6b35'
-        self.SUNRISE_COLOR = '#ffb347'
-
-        # Initialize data and create plot
-        self.id = id
         self._setup_matplotlib_style()
-        if self._load_data():
-            self._create_plot()
 
     def _setup_matplotlib_style(self):
         """Configure matplotlib style for dark theme."""
         mpl.rcParams.update({
-            'figure.facecolor': '#1a1c1e',
+            'figure.facecolor': 'none',
             'axes.facecolor': '#1a1c1e',
             'axes.edgecolor': '#4a4f55',
             'axes.labelcolor': '#e0e0e0',
@@ -54,6 +42,65 @@ class MeteoPlot(FigureCanvas):
             'xtick.direction': 'out',
             'ytick.direction': 'out',
         })
+
+    def _adjust_layout(self):
+        """Adjust plot layout and margins."""
+        self.figure.subplots_adjust(
+            left=0.08,
+            right=0.92,
+            top=0.82,
+            bottom=0.20
+        )
+
+    def _add_interactivity(self):
+        """Add interactive features to the plot."""
+        # Enable zoom and pan
+        self.setFocusPolicy(1)  # Click focus
+        self.setMouseTracking(True)
+
+        # Add data cursor
+        cursor = mplcursors.cursor(hover=True)
+
+        @cursor.connect("add")
+        def on_add(sel):
+            # Format the annotation based on data type
+            if hasattr(self, 'temps') and sel.artist in self.ax.get_lines():
+                idx = np.abs(self.time_nums_smooth - sel.target[0]).argmin()
+                if sel.artist.get_label() == 'Temperature [°C]':
+                    sel.annotation.set_text(f"Temp: {self.temps_smooth[idx]:.1f}°C")
+                elif sel.artist.get_label() == 'Feels Like [°C]':
+                    sel.annotation.set_text(f"Feels: {self.apparent_temps_smooth[idx]:.1f}°C")
+            elif hasattr(self, 'cloud_cover_smooth') and sel.artist in self.ax_clouds.get_lines():
+                idx = np.abs(self.time_nums_smooth - sel.target[0]).argmin()
+                sel.annotation.set_text(f"Clouds: {self.cloud_cover_smooth[idx]:.1f}%")
+            elif hasattr(self, 'rain') and self.ax_rain and sel.artist in self.ax_rain.containers:
+                # Find the closest rain bar
+                times_num = mdates.date2num(self.shifted_times)
+                idx = np.abs(times_num - sel.target[0]).argmin()
+                sel.annotation.set_text(f"Rain: {self.rain[idx]:.1f}mm")
+
+
+class MeteoPlot(BasePlot):
+    """Weather forecast plot with temperature, precipitation, cloud cover, and sun markers."""
+
+    def __init__(self, id, parent=None):
+        # Constants
+        self.CHART_HOURS = 36
+        self.MAIN_COLOR = '#ff4f64'
+        self.APPARENT_COLOR = '#5bc0ff'
+        self.RAIN_COLOR = '#4da6ff'
+        self.CLOUD_COLOR = '#888888'
+        self.SUNSET_COLOR = '#ff6b35'
+        self.SUNRISE_COLOR = '#ffb347'
+
+        self.id = id
+        self.ax_rain = None
+
+        super().__init__(parent)
+
+        if self._load_data():
+            self._create_plot()
+            self._add_interactivity()
 
     def _load_data(self):
         """Load weather and location data."""
@@ -85,7 +132,6 @@ class MeteoPlot(FigureCanvas):
         self.cloud_cover = hourly.get("cloud_cover", [])
         self.day = hourly.get("is_day", [])
 
-
         # Calculate time range
         self.now = datetime.now()
         self.end_time = self.now + timedelta(hours=self.CHART_HOURS)
@@ -107,7 +153,6 @@ class MeteoPlot(FigureCanvas):
                     self._parse_sun_times(sun_data['results'], date)
             except Exception as e:
                 print(f"Error fetching sun data for {date}: {e}")
-
 
     def _get_chart_dates(self):
         """Get list of dates covered by the chart."""
@@ -147,7 +192,6 @@ class MeteoPlot(FigureCanvas):
     def _create_plot(self):
         """Create the main weather plot."""
         self.figure = Figure()
-        self.canvas = FigureCanvas(self.figure)
         self.ax = self.figure.add_subplot(111)
 
         self.figure.patch.set_alpha(0.0)
@@ -162,11 +206,14 @@ class MeteoPlot(FigureCanvas):
         self._add_temperature_lines()
         self._add_precipitation()
         self._add_sun_markers()
+
         self._configure_axes()
         self._add_temperature_labels()
         self._add_grid_and_legend()
         self._set_title_and_labels()
         self._adjust_layout()
+
+        self.draw()
 
     def _create_smooth_data(self):
         """Create smooth interpolated data for plotting."""
@@ -186,15 +233,33 @@ class MeteoPlot(FigureCanvas):
 
     def _add_day_night_background(self):
         """Add day/night background based on sunrise/sunset times."""
+        if not self.sun_markers:
+            return
 
-        # Apply day/night background
-        for i in range(len(self.times) - 1):
-            start_time = self.times[i]
-            end_time = self.times[i + 1]
-            color = '#2a2e35' if self.day[i] else '#1a1c1e'
-            alpha = 0.3 if self.day[i] else 0.5
+        # Sort markers by datetime
+        markers = sorted(self.sun_markers, key=lambda x: x[1])
 
-            self.ax.axvspan(start_time, end_time, color=color, alpha=alpha, zorder=-1)
+        # Start from chart start
+        last_time = self.now
+        if markers[0][0] == "sunset":
+            last_is_day = True
+        else:
+            last_is_day = False
+
+        for marker_type, marker_time in markers:
+            color = '#2a2e35' if last_is_day else '#1a1c1e'
+            alpha = 0.3 if last_is_day else 0.5
+
+            self.ax.axvspan(last_time, marker_time, color=color, alpha=alpha, zorder=-1)
+
+            # Update for next span
+            last_time = marker_time
+            last_is_day = (marker_type == 'sunrise')
+
+        # Fill remaining until chart end
+        color = '#2a2e35' if last_is_day else '#1a1c1e'
+        alpha = 0.3 if last_is_day else 0.5
+        self.ax.axvspan(last_time, self.end_time, color=color, alpha=alpha, zorder=-1)
 
     def _add_cloud_coverage(self):
         """Add cloud coverage as secondary y-axis."""
@@ -275,7 +340,6 @@ class MeteoPlot(FigureCanvas):
 
     def _add_precipitation(self):
         """Add precipitation bars if rain data exists."""
-        self.ax_rain = None
         if any(self.rain):
             self.ax_rain = self.ax.twinx()
 
@@ -285,7 +349,7 @@ class MeteoPlot(FigureCanvas):
             self.ax_rain.tick_params(axis='y', labelcolor=self.RAIN_COLOR)
 
             # Rain bars
-            self.ax_rain.bar(
+            bars = self.ax_rain.bar(
                 self.shifted_times,
                 self.rain,
                 width=0.03,
@@ -369,8 +433,8 @@ class MeteoPlot(FigureCanvas):
         """Add temperature value labels on the chart."""
         bbox_color = (26 / 255, 28 / 255, 30 / 255, 0.7)
 
-        for x, y in zip(self.shifted_times, self.temps):
-            if self.now <= x <= self.end_time and x.hour % 1 == 0:
+        for x, y in zip(self.times, self.temps):
+            if self.now <= x <= self.end_time and x.hour % 2 == 0:
                 self.ax.annotate(
                     f"{y:.0f}°",
                     (x, y),
@@ -424,55 +488,20 @@ class MeteoPlot(FigureCanvas):
         self.ax.set_xlabel("Time [Hours]", labelpad=10)
         self.ax.set_ylabel("Temperature [°C]", labelpad=10)
 
-    def _adjust_layout(self):
-        """Adjust plot layout and margins."""
-        self.figure.subplots_adjust(
-            left=0.08,
-            right=0.92,
-            top=0.82,
-            bottom=0.20
-        )
 
-class HydroPlot(FigureCanvas):
+class HydroPlot(BasePlot):
+    """Water level plot with interactive features."""
 
     def __init__(self, id, parent=None):
-        self.fig = Figure(figsize=(5, 3))
-        super().__init__(self.fig)
-
         self.MAIN_COLOR = '#03d7fc'
         self.id = id
-        self.ax = self.fig.add_subplot(111)
 
-        self._setup_matplotlib_style()
+        super().__init__(parent)
+
         if self._load_data():
             self._create_plot()
-        self._adjust_layout()
-
-
-    def _setup_matplotlib_style(self):
-        """Configure matplotlib style for dark theme."""
-        mpl.rcParams.update({
-            'figure.facecolor': '#1a1c1e',
-            'axes.facecolor': '#1a1c1e',
-            'axes.edgecolor': '#4a4f55',
-            'axes.labelcolor': '#e0e0e0',
-            'xtick.color': '#b0b0b0',
-            'ytick.color': '#b0b0b0',
-            'grid.color': '#3a3f45',
-            'grid.linestyle': '--',
-            'grid.alpha': 0.7,
-            'lines.linewidth': 2.5,
-            'font.size': 9,
-            'font.family': 'Segoe UI',
-            'legend.facecolor': '#2a2e32',
-            'legend.edgecolor': '#3a3f45',
-            'legend.fontsize': 10,
-            'legend.labelcolor': 'white',
-            'legend.framealpha': 0.9,
-            'xtick.direction': 'out',
-            'ytick.direction': 'out',
-        })
-
+            self._add_interactivity()
+            self._adjust_layout()
 
     def _load_data(self):
         try:
@@ -500,7 +529,6 @@ class HydroPlot(FigureCanvas):
             except Exception as e:
                 print(f"Skipping entry {entry}: {e}")
         return times, levels
-
 
     def _smooth_data(self, times, levels):
         """Interpolate levels for smoother plot."""
@@ -563,16 +591,17 @@ class HydroPlot(FigureCanvas):
             f"Water level – {self.hydro_data[0]['data']['stacja']}",
             fontsize=12, color="white", fontweight="bold"
         )
-        self.ax.set_xlabel("Czas pomiaru")
-        self.ax.set_ylabel("Stan wody [cm]")
+        self.ax.set_xlabel("")
+        self.ax.set_ylabel("Water level [cm]")
         self.ax.grid(True, linestyle="--", alpha=0.6)
         self.ax.legend()
-        self.fig.set_facecolor("none")
 
     def _create_plot(self):
         """High-level orchestrator for building the plot."""
+        self.figure = Figure(figsize=(5, 3))
+        self.ax = self.figure.add_subplot(111)
+
         times, levels = self._parse_data()
-        self.ax.clear()
         times_smooth, levels_smooth = self._smooth_data(times, levels)
         self._plot_levels(times_smooth, levels_smooth)
         self._set_y_limits(levels_smooth)
@@ -580,12 +609,14 @@ class HydroPlot(FigureCanvas):
         self._add_labels_and_grid()
         self.draw()
 
+    def _add_interactivity(self):
+        """Add interactive features to the hydro plot."""
+        super()._add_interactivity()
 
-    def _adjust_layout(self):
-        """Adjust plot layout and margins."""
-        self.figure.subplots_adjust(
-            left=0.08,
-            right=0.92,
-            top=0.82,
-            bottom=0.20
-        )
+        # Custom cursor for hydro data
+        cursor = mplcursors.cursor(self.ax.get_lines(), hover=True)
+
+        @cursor.connect("add")
+        def on_add(sel):
+            idx = np.abs(mdates.date2num(self.times_smooth) - sel.target[0]).argmin()
+            sel.annotation.set_text(f"Level: {self.levels_smooth[idx]:.1f} cm")
