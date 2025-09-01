@@ -1,0 +1,17 @@
+# Core GUI Framework
+PyQt5>=5.15.0
+PyQtWebEngine>=5.15.0
+
+# Data visualization and plotting
+matplotlib>=3.5.0
+numpy>=1.21.0
+scipy>=1.9.0
+
+# Interactive mapping
+folium>=0.12.0
+
+# HTTP requests for API calls
+requests>=2.28.0
+
+# Standard library modules (included with Python)
+# json, os, sys, tempfile, datetime, time, math, re
