@@ -12,10 +12,7 @@ A PyQt5-based desktop application designed for nature photographers to track wea
 
 ## 📱 Screenshots
 
-| <img width="1202" height="832" alt="image" src="https://github.com/user-attachments/assets/9c9656f0-3a4d-4e58-b42f-0e67aac4edeb" />
-  | <img width="1202" height="832" alt="image" src="https://github.com/user-attachments/assets/d9dd973d-ffb7-4e2c-ab30-0a7adccb4406" />
- />
-   |
+| <img width="1202" height="832" alt="image" src="https://github.com/user-attachments/assets/9c9656f0-3a4d-4e58-b42f-0e67aac4edeb" /> | <img width="1202" height="832" alt="image" src="https://github.com/user-attachments/assets/d9dd973d-ffb7-4e2c-ab30-0a7adccb4406" /> |
 | --- | --- |
 | Map Interface   | Weather Charts  |
 
