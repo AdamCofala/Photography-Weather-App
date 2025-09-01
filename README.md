@@ -8,12 +8,14 @@ A PyQt5-based desktop application designed for nature photographers to track wea
 - **Weather Forecasting**: 48-hour detailed weather charts with temperature, precipitation, and cloud coverage
 - **Hydrological Data**: Real-time water level monitoring from Polish hydrological stations
 - **Location Management**: Save, view, and remove photography locations
-- **Dark Theme**: Professional dark UI optimized for outdoor photographers
 - **Sunrise/Sunset Times**: Visual markers for golden hour photography planning
 
 ## 📱 Screenshots
 
-| <img width="1202" height="832" alt="image" src="https://github.com/user-attachments/assets/809e21f5-f096-400c-b40a-3e26d92a6f68" />  | <img width="1202" height="832" alt="image" src="https://github.com/user-attachments/assets/f51008bf-b71b-4894-8387-0d86986949a2" />   |
+| <img width="1202" height="832" alt="image" src="https://github.com/user-attachments/assets/9c9656f0-3a4d-4e58-b42f-0e67aac4edeb" />
+  | <img width="1202" height="832" alt="image" src="https://github.com/user-attachments/assets/d9dd973d-ffb7-4e2c-ab30-0a7adccb4406" />
+ />
+   |
 | --- | --- |
 | Map Interface   | Weather Charts  |
 
