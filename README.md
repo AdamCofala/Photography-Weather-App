@@ -95,8 +95,8 @@ numpy>=1.21.0
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/nature-photo-weather-app.git
-   cd nature-photo-weather-app
+   git clone [https://github.com/yourusername/nature-photo-weather-app.git](https://github.com/AdamCofala/Photography-Weather-App.git)
+   cd Photography-Weather-App
    ```
 
 2. **Install dependencies**
