@@ -21,10 +21,10 @@ class Sidebar(QWidget):
         # If item was clicked send info to main and then show the stats!
         self.location_list.itemClicked.connect(self.choose_loc)
 
-        self.add_btn = QPushButton("Add localization")
+        self.add_btn = QPushButton("Add location")
         self.add_btn.clicked.connect(self.add_loc)
 
-        self.remove_btn = QPushButton("Delete localization")
+        self.remove_btn = QPushButton("Delete location")
         self.remove_btn.clicked.connect(self.remove_loc)
         self.remove_btn.setFocusPolicy(Qt.NoFocus)
 
