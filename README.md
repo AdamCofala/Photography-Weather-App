@@ -13,76 +13,15 @@ A PyQt5-based desktop application designed for nature photographers to track wea
 
 ## 📱 Screenshots
 
-### Main Interface
-*[Screenshot of the main window with sidebar and map view]*
+| <img width="1202" height="832" alt="image" src="https://github.com/user-attachments/assets/809e21f5-f096-400c-b40a-3e26d92a6f68" />  | <img width="1202" height="832" alt="image" src="https://github.com/user-attachments/assets/f51008bf-b71b-4894-8387-0d86986949a2" />   |
+| --- | --- |
+| Map Interface   | Weather Charts  |
 
-### Weather Charts
-*[Screenshot showing the detailed weather forecast charts]*
 
-### Location Management
-*[Screenshot of the sidebar with saved locations]*
-
-### Interactive Map
-*[Screenshot of the map interface with location markers]*
 
 ## 🏗️ Application Architecture
+<img width="3110" height="2640" alt="Weather app" src="https://github.com/user-attachments/assets/bd780b1a-45f3-4108-8474-bcb47a6164d0" />
 
-```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   main.py       │────│ MainWindow       │────│   MainView      │
-│                 │    │ (gui/main_       │    │ (gui/main_      │
-│ - Entry point   │    │  window.py)      │    │  view.py)       │
-│ - App styling   │    │                  │    │                 │
-└─────────────────┘    │ - Window setup   │    │ - Map display   │
-                       │ - Layout mgmt    │    │ - Stats display │
-                       └─────────┬────────┘    │ - View switching│
-                                 │             └─────────┬───────┘
-                                 │                       │
-                       ┌─────────▼────────┐             │
-                       │   Sidebar        │             │
-                       │ (gui/sidebar.py) │             │
-                       │                  │             │
-                       │ - Location list  │◄────────────┤
-                       │ - Add/Remove     │             │
-                       │ - Selection mgmt │             │
-                       └─────────┬────────┘             │
-                                 │                      │
-        ┌────────────────────────┼──────────────────────┼────────────────┐
-        │                        │                      │                │
-┌───────▼────────┐    ┌─────────▼──────────┐    ┌──────▼─────────┐      │
-│  MapHandler    │    │  Location Base     │    │ Chart Builder  │      │
-│ (logic/map/    │    │ (logic/utils/      │    │ (logic/stats/  │      │
-│  map_handler.  │    │  location_base.py) │    │  chart_builder │      │
-│  py)           │    │                    │    │  .py)          │      │
-│                │    │ - JSON storage     │    │                │      │
-│ - Folium maps  │    │ - Location class   │    │ - MeteoPlot    │      │
-│ - Custom JS    │    │ - CRUD operations  │    │ - HydroPlot    │      │
-│ - HTML styling │    └─────────┬──────────┘    │ - Matplotlib   │      │
-└───────┬────────┘              │               └──────┬─────────┘      │
-        │                       │                      │                │
-        │              ┌────────▼───────────┐          │                │
-        │              │   Haversine        │          │                │
-        │              │ (logic/utils/      │          │                │
-        │              │  haversine.py)     │          │                │
-        │              │                    │          │                │
-        │              │ - Distance calc    │          │                │
-        │              │ - Closest city     │          │                │
-        │              │ - Closest station  │          │                │
-        │              └────────────────────┘          │                │
-        │                                              │                │
-        └──────────────────────────┬─────────────────────────────────────┘
-                                   │
-                         ┌─────────▼──────────┐
-                         │   Data Fetcher     │
-                         │ (logic/stats/      │
-                         │  data_fetcher.py)  │
-                         │                    │
-                         │ - Weather API      │
-                         │ - Sun times API    │
-                         │ - Hydro data API   │
-                         │ - Data processing  │
-                         └────────────────────┘
-```
 
 ## 📁 Project Structure
 
@@ -109,35 +48,7 @@ nature_photo_app/
         └── haversine.py             # Geographic distance calculations
 ```
 
-## 🔄 Application Flow
-
-### 1. **Startup**
-- `main.py` initializes PyQt5 application
-- Dark theme stylesheet is applied
-- `MainWindow` creates the main interface with sidebar and view area
-
-### 2. **Location Management**
-- **Adding Locations**: 
-  - User clicks "Dodaj lokalizację" → Map view opens
-  - User clicks on map → Coordinates are captured via JavaScript
-  - Closest Polish city is found using Haversine distance
-  - Location is saved to `config.json` and added to sidebar
-
-- **Viewing Statistics**: 
-  - User selects location from sidebar
-  - Weather and hydrological data is fetched from APIs
-  - Charts are generated and displayed in the main view
-
-### 3. **Data Flow**
-```
-User Selection → Data Fetcher → API Requests → Chart Builder → Display
-     ↓              ↓              ↓              ↓           ↓
-   Location      Coordinates    Weather &      Matplotlib   PyQt5
-   from JSON      to APIs      Hydro Data      Charts      Widgets
-```
-
 ## 🛠️ Technical Implementation
-
 ### **GUI Architecture**
 - **PyQt5 Framework**: Modern desktop GUI with native OS integration
 - **Signal-Slot Pattern**: Clean communication between components
@@ -160,8 +71,8 @@ User Selection → Data Fetcher → API Requests → Chart Builder → Display
 ### **Data Sources**
 - **Open-Meteo API**: European weather forecasting data
 - **Sunrise-Sunset API**: Astronomical data for photography planning  
-- **Polish Hydrological Data**: Real-time water levels from GitHub repository
-- **Geographic Calculations**: Haversine formula for distance calculations
+- [**Polish Hydrological Data**](https://github.com/AdamCofala/polish-hydro-data): Real-time water levels from my own GitHub repository
+
 
 ## 📋 Requirements
 
@@ -199,7 +110,7 @@ numpy>=1.21.0
    ```
 
 4. **Usage**
-   - Click "Dodaj lokalizację" to add new photography locations
+   - Click "Add location" to add new photography locations
    - Select locations from the sidebar to view weather and water level data
    - Plan your photography sessions using the 48-hour weather forecasts
    - Monitor water levels for landscape and wildlife photography
@@ -232,13 +143,6 @@ Contributions are welcome! Please feel free to submit pull requests or open issu
 ## 📄 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🙏 Acknowledgments
-
-- **Open-Meteo**: For providing free weather API access
-- **Polish Hydrological Data**: For real-time water level monitoring
-- **OpenStreetMap**: For map tiles and geographic data
-- **PyQt5**: For the robust desktop GUI framework
 
 ---
 
