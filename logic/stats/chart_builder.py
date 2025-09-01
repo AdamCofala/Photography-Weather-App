@@ -52,38 +52,11 @@ class BasePlot(FigureCanvas):
             bottom=0.20
         )
 
-    def _add_interactivity(self):
-        """Add interactive features to the plot."""
-        # Enable zoom and pan
-        self.setFocusPolicy(1)  # Click focus
-        self.setMouseTracking(True)
-
-        # Add data cursor
-        cursor = mplcursors.cursor(hover=True)
-
-        @cursor.connect("add")
-        def on_add(sel):
-            # Format the annotation based on data type
-            if hasattr(self, 'temps') and sel.artist in self.ax.get_lines():
-                idx = np.abs(self.time_nums_smooth - sel.target[0]).argmin()
-                if sel.artist.get_label() == 'Temperature [°C]':
-                    sel.annotation.set_text(f"Temp: {self.temps_smooth[idx]:.1f}°C")
-                elif sel.artist.get_label() == 'Feels Like [°C]':
-                    sel.annotation.set_text(f"Feels: {self.apparent_temps_smooth[idx]:.1f}°C")
-            elif hasattr(self, 'cloud_cover_smooth') and sel.artist in self.ax_clouds.get_lines():
-                idx = np.abs(self.time_nums_smooth - sel.target[0]).argmin()
-                sel.annotation.set_text(f"Clouds: {self.cloud_cover_smooth[idx]:.1f}%")
-            elif hasattr(self, 'rain') and self.ax_rain and sel.artist in self.ax_rain.containers:
-                # Find the closest rain bar
-                times_num = mdates.date2num(self.shifted_times)
-                idx = np.abs(times_num - sel.target[0]).argmin()
-                sel.annotation.set_text(f"Rain: {self.rain[idx]:.1f}mm")
-
-
 class MeteoPlot(BasePlot):
     """Weather forecast plot with temperature, precipitation, cloud cover, and sun markers."""
 
     def __init__(self, id, parent=None):
+
         # Constants
         self.CHART_HOURS = 36
         self.MAIN_COLOR = '#ff4f64'
@@ -100,7 +73,6 @@ class MeteoPlot(BasePlot):
 
         if self._load_data():
             self._create_plot()
-            self._add_interactivity()
 
     def _load_data(self):
         """Load weather and location data."""
@@ -500,7 +472,6 @@ class HydroPlot(BasePlot):
 
         if self._load_data():
             self._create_plot()
-            self._add_interactivity()
             self._adjust_layout()
 
     def _load_data(self):
@@ -608,15 +579,3 @@ class HydroPlot(BasePlot):
         self._configure_x_axis(times)
         self._add_labels_and_grid()
         self.draw()
-
-    def _add_interactivity(self):
-        """Add interactive features to the hydro plot."""
-        super()._add_interactivity()
-
-        # Custom cursor for hydro data
-        cursor = mplcursors.cursor(self.ax.get_lines(), hover=True)
-
-        @cursor.connect("add")
-        def on_add(sel):
-            idx = np.abs(mdates.date2num(self.times_smooth) - sel.target[0]).argmin()
-            sel.annotation.set_text(f"Level: {self.levels_smooth[idx]:.1f} cm")

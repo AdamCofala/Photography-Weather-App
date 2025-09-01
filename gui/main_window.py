@@ -6,9 +6,8 @@ from gui.main_view import MainView
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Aplikacja fotografa przyrody")
+        self.setWindowTitle("Photography Weather App")
         self.resize(1200, 800)
-
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)

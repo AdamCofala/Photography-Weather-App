@@ -13,10 +13,10 @@ function latLngPop(e) {
                     .setLatLng(e.latlng)
                     .setContent(
                         "<div style='font-family: Segoe UI; color: white; font-size: 12px;'>" +
-                        "<button id='addLocationBtn' class='custom-popup-btn'>➕ Dodaj lokalizację</button>" +
+                        "<button id='addLocationBtn' class='custom-popup-btn'>➕ Add localization</button>" +
                         "<br><br>Lat: " + e.latlng.lat.toFixed(6) +
                         "<br>Lng: " + e.latlng.lng.toFixed(6) +
-                        "<br>Czas: " + new Date().toLocaleString() +
+                        "<br>Time: " + new Date().toLocaleString() +
                         "</div>"
                     )
 

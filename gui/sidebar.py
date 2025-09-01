@@ -21,10 +21,10 @@ class Sidebar(QWidget):
         # If item was clicked send info to main and then show the stats!
         self.location_list.itemClicked.connect(self.choose_loc)
 
-        self.add_btn = QPushButton("Dodaj lokalizację")
+        self.add_btn = QPushButton("Add localization")
         self.add_btn.clicked.connect(self.add_loc)
 
-        self.remove_btn = QPushButton("Usuń lokalizację")
+        self.remove_btn = QPushButton("Delete localization")
         self.remove_btn.clicked.connect(self.remove_loc)
         self.remove_btn.setFocusPolicy(Qt.NoFocus)
 
@@ -44,15 +44,13 @@ class Sidebar(QWidget):
         self.location_list.clear()
         locations = loc.get_locations("assets/config.json")
 
-        if not locations:  # Lista jest pusta
-            self.list_empty.emit()  # Emituj sygnał pustej listy
+        if not locations:
+            self.list_empty.emit()
             return
 
-        # Lista nie jest pusta - dodaj elementy
         for location in locations:
             self.location_list.addItem(f"{location['Name']}\n {location['Lat']:.2f}, {location['Lon']:.2f} ")
 
-        # Automatycznie wybierz ostatni element tylko jeśli lista nie jest pusta
         count = self.location_list.count()
         if count > 0:
             item = self.location_list.item(count - 1)
@@ -68,7 +66,7 @@ class Sidebar(QWidget):
 
     def choose_loc(self):
         current_row = self.location_list.currentRow()
-        if current_row >= 0:  # Sprawdź czy wybór jest poprawny
+        if current_row >= 0:
             self.choose_location.emit(current_row)
 
     def remove_loc(self):
@@ -76,7 +74,7 @@ class Sidebar(QWidget):
 
         # Check if there's actually a valid item selected
         if current < 0 or current >= self.location_list.count():
-            return  # No valid selection, don't remove anything
+            return
 
         # Remove from the JSON file
         loc.remove_loc("assets/config.json", current)
@@ -90,9 +88,8 @@ class Sidebar(QWidget):
         # Handle selection after removal
         new_count = self.location_list.count()
 
-        # KLUCZOWA ZMIANA: Jeśli lista jest pusta, nie rób nic więcej
         if new_count == 0:
-            return  # Lista pusta - update_list() już wyemitowało list_empty
+            return
 
         # Determine which row to select
         if current >= new_count:
