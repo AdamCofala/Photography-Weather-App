@@ -61,14 +61,7 @@ def remove_loc(path, id):
 
 
 if __name__ == '__main__':
-    # loc = Location("Skibidi", 32.221, 323.23, "dada")
-    # loc1 = Location("sigma boy", 32.221, 323.23, "dada")
-    # loc2 = Location("adadjs", 32.221, 323.23, "dada")
-    # loc3 = Location("dadadad", 32.221, 323.23, "dada")
-    # loc.to_json("config.json")
-    # loc1.to_json("config.json")
-    # loc2.to_json("config.json")
-    # loc3.to_json("config.json")
+    # For some tests
     remove_loc("config.json", 2)
 
 
