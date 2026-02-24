@@ -1,8 +1,8 @@
-# Nature Photography Weather App 📸🌦️
+# Nature Photography Weather App 
 
 A PyQt5-based desktop application designed for nature photographers to track weather conditions and water levels at their favorite shooting locations across Poland.
 
-## 🎯 Features
+## Features
 
 - **Interactive Map**: Click-to-add locations using Folium maps with custom styling
 - **Weather Forecasting**: 48-hour detailed weather charts with temperature, precipitation, and cloud coverage
@@ -10,7 +10,7 @@ A PyQt5-based desktop application designed for nature photographers to track wea
 - **Location Management**: Save, view, and remove photography locations
 - **Sunrise/Sunset Times**: Visual markers for golden hour photography planning
 
-## 📱 Screenshots
+## Screenshots
 
 | <img width="1202" height="832" alt="image" src="https://github.com/user-attachments/assets/9c9656f0-3a4d-4e58-b42f-0e67aac4edeb" /> | <img width="1202" height="832" alt="image" src="https://github.com/user-attachments/assets/d9dd973d-ffb7-4e2c-ab30-0a7adccb4406" /> |
 | --- | --- |
@@ -18,11 +18,11 @@ A PyQt5-based desktop application designed for nature photographers to track wea
 
 
 
-## 🏗️ Application Architecture
+## Application Architecture
 <img width="3110" height="2640" alt="Weather app" src="https://github.com/user-attachments/assets/bd780b1a-45f3-4108-8474-bcb47a6164d0" />
 
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 nature_photo_app/
@@ -47,7 +47,7 @@ nature_photo_app/
         └── haversine.py             # Geographic distance calculations
 ```
 
-## 🛠️ Technical Implementation
+## Technical Implementation
 ### **GUI Architecture**
 - **PyQt5 Framework**: Modern desktop GUI with native OS integration
 - **Signal-Slot Pattern**: Clean communication between components
@@ -73,7 +73,7 @@ nature_photo_app/
 - [**Polish Hydrological Data**](https://github.com/AdamCofala/polish-hydro-data): Real-time water levels from my own GitHub repository
 
 
-## 📋 Requirements
+## Requirements
 
 ### Dependencies
 ```
@@ -90,7 +90,7 @@ numpy>=1.21.0
 - Qt5 WebEngine support
 - Internet connection for API data and map tiles
 
-## 🚀 Installation & Usage
+## Installation & Usage
 
 1. **Clone the repository**
    ```bash
@@ -114,7 +114,7 @@ numpy>=1.21.0
    - Plan your photography sessions using the 48-hour weather forecasts
    - Monitor water levels for landscape and wildlife photography
 
-## 🎨 Features in Detail
+## Features in Detail
 
 ### Weather Charts
 - **Temperature Trends**: Actual and "feels like" temperature with smooth curves
@@ -135,19 +135,19 @@ numpy>=1.21.0
 - **Persistent Storage**: JSON-based location database with ID management
 - **Smart Selection**: Automatic selection of closest cities and monitoring stations
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please feel free to submit pull requests or open issues for bugs and feature requests.
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
 ---
 
 **Perfect for nature photographers who want to:**
-- 🌅 Plan golden hour sessions with sunrise/sunset data
-- 🌦️ Avoid bad weather with accurate forecasting
-- 🏞️ Monitor water levels for landscape photography
-- 📍 Organize and revisit favorite shooting locations
-- 📊 Make data-driven decisions for outdoor photography
+-  Plan golden hour sessions with sunrise/sunset data
+-  Avoid bad weather with accurate forecasting
+-  Monitor water levels for landscape photography
+-  Organize and revisit favorite shooting locations
+-  Make data-driven decisions for outdoor photography
